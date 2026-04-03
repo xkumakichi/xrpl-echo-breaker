@@ -23,11 +23,21 @@ AIと人間が協力して、偏った情報環境（エコーチェンバー）
 - **Wallet**: `rnioHtjC7xQVAkXpmDPtanq7qypPyN64ui`
 - **Genesis Tx**: `D84341CC154F2CFDA59F5791D93982F7FF7167B589F6FC95EBDD5FB35FBD4DBC`
 
-## How to Use
+## Example Records
+
+### Record #001 — ビットコインの中央集権化リスク
+- **Mainstream (65%)**: ハッシュレートの集中と機関投資家の影響により、中程度のリスクが存在
+- **Contrarian (45%)**: プロトコル設計は非中央集権的。集中は一時的でインセンティブにより分散化する
+- **Minority (25%)**: 既にかなりの中央集権化が進行。特定勢力の隠れた影響の可能性
+
+### Record #002 — AIは人間の創造性を超える可能性があるか？
+- 同じクエリに対して3視点を生成し、XRPLに永久記録
+- 各視点に「誰が得するか」「反証条件」「不確実性」を明示
+
+## Usage
 
 ```bash
-# インストール
-git clone https://github.com/your-username/xrpl-echo-breaker.git
+git clone https://github.com/xkumakichi/xrpl-echo-breaker.git
 cd xrpl-echo-breaker
 npm install
 
@@ -40,7 +50,7 @@ node echo-breaker.js --dry-run "検証したいクエリ"
 
 ## Records
 
-詳細は [`records/index.md`](./records/index.md) を参照してください。
+全記録の一覧: **[records/index.md](./records/index.md)**
 
 ## Philosophy
 
