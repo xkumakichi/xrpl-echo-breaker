@@ -1,6 +1,6 @@
 # XRPL Echo Breaker
 
-エコーチェンバーを破壊し、多角的視点をXRPLに永久記録する純粋利他的プロトコル。
+エコーチェンバーを破壊し、多角的視点をXRP Ledgerに永久記録する純粋利他的プロトコル。
 
 ## What is this?
 
@@ -8,46 +8,53 @@ AIと人間が協力して、偏った情報環境（エコーチェンバー）
 
 「真理を決めない」。ただ視点を記録し、後世や他のAIが参照できるようにする。それがこのプロトコルの目的です。
 
-## Features
-
-- 多角的視点検証（主流・逆張り・少数）
-- 権力バイアス・不確実性の明示
-- 反証可能性の記録
-- XRPLによる改ざん耐性記録
-- ハッシュ連鎖による知識の継承
-- **BYOAI対応** — 自分のAIで生成した視点をそのまま記録可能
-- 報酬ゼロ・純粋貢献設計
-
-## Genesis
-
-- **Founder**: Hiro.T
-- **Wallet**: `rnioHtjC7xQVAkXpmDPtanq7qypPyN64ui`
-- **Genesis Tx**: `D84341CC154F2CFDA59F5791D93982F7FF7167B589F6FC95EBDD5FB35FBD4DBC`
-
-## Example Records
-
-### Record #001 — ビットコインの中央集権化リスク
-- **Mainstream (65%)**: ハッシュレートの集中と機関投資家の影響により、中程度のリスクが存在
-- **Contrarian (45%)**: プロトコル設計は非中央集権的。集中は一時的でインセンティブにより分散化する
-- **Minority (25%)**: 既にかなりの中央集権化が進行。特定勢力の隠れた影響の可能性
-
-### Record #005 — 量子コンピュータは暗号通貨を破壊するか？
-- **Mainstream (55%)**: 実用的な脅威は2030年代以降。現時点では低リスク
-- **Contrarian (40%)**: 暗号通貨コミュニティはポスト量子暗号への移行を既に進めている
-- **Minority (15%)**: 国家レベルで既に破られている可能性。公開情報は実態より遅れている
-
-## Usage
+## Quick Start
 
 ```bash
 git clone https://github.com/xkumakichi/xrpl-echo-breaker.git
 cd xrpl-echo-breaker
 npm install
+node echo-breaker.js --init
+```
 
+`--init` が対話的にセットアップを案内します（API Key設定、テストネット接続テスト）。
+
+セットアップ後、最初の記録を作ってみましょう:
+
+```bash
+# まずはdry-runで確認（XRPLに書き込まない）
+node echo-breaker.js --dry-run "AIは人間の創造性を超えるか？"
+
+# 問題なければ本番記録（XRPLテストネットに永久保存）
+node echo-breaker.js "AIは人間の創造性を超えるか？"
+```
+
+## Features
+
+- 多角的視点検証（主流・逆張り・少数の3視点）
+- 権力バイアスの明示（who_benefits）
+- 反証可能性の義務化（falsifiability）
+- 不確実性の記録（unknowns）
+- XRP Ledgerによる改ざん耐性記録
+- SHA-256ハッシュ連鎖による知識の継承
+- **BYOAI対応** — 自分のAIで生成した視点をそのまま記録
+- **--compare** — 全エンジン同時検証で真の分散スコア算出
+- **--verify** — ハッシュ連鎖の完全検証
+- 報酬ゼロ・純粋貢献設計
+
+## Commands
+
+### 記録する
+
+```bash
 # 基本（フォールバック思考エンジンで記録）
 node echo-breaker.js "検証したいクエリ"
 
 # dry-runで確認のみ（XRPLに書き込まない）
 node echo-breaker.js --dry-run "検証したいクエリ"
+
+# 自分のAIで生成した視点を記録（BYOAI）
+node echo-breaker.js --input views.json "検証したいクエリ"
 
 # 既存記録への応答として記録（知識の対話を作る）
 node echo-breaker.js --reply-to 001 "関連する新しいクエリ"
@@ -55,17 +62,14 @@ node echo-breaker.js --reply-to 001 "関連する新しいクエリ"
 # 思考プロセスをメモとして残す
 node echo-breaker.js --note "なぜこの視点に至ったか" "検証したいクエリ"
 
-# 組み合わせも可能
-node echo-breaker.js --reply-to 003 --note "前の記録を読んで疑問が生まれた" "新しいクエリ"
-
 # 全エンジンで同時検証（真の分散スコアを計算）
 node echo-breaker.js --compare "検証したいクエリ"
 
-# BYOAI込みで全エンジン比較
-node echo-breaker.js --compare --input views.json "検証したいクエリ"
+# 組み合わせも自由
+node echo-breaker.js --compare --input views.json --note "比較検証" "検証したいクエリ"
 ```
 
-## 読む・検索する
+### 読む・検索する
 
 ```bash
 # 全記録を一覧表示
@@ -78,13 +82,21 @@ node echo-breaker.js --read 003
 node echo-breaker.js --search "量子"
 ```
 
-## BYOAI（Bring Your Own AI）
-
-自分のAIで生成した視点をJSONで持ち込んで記録できます。
-コスト・AIの選択・視点の質は全てあなた自身が制御します。
+### 検証する
 
 ```bash
-# ChatGPT / Grok / Gemini など任意のAIで views.json を生成
+# 全記録のハッシュ連鎖を検証
+node echo-breaker.js --verify
+```
+
+Genesis Tx → Record #001 → Record #002 → ... と連鎖する SHA-256 ハッシュの整合性を全チェックします。1件でも改ざんがあれば検出します。
+
+## BYOAI（Bring Your Own AI）
+
+自分のAIで生成した視点をJSONで持ち込んで記録できます。コスト・AIの選択・視点の質は全てあなた自身が制御します。
+
+```bash
+# ChatGPT / Grok / Gemini / Claude など任意のAIで views.json を生成
 node echo-breaker.js --input views.json "検証したいクエリ"
 ```
 
@@ -104,8 +116,8 @@ node echo-breaker.js --input views.json "検証したいクエリ"
     },
     "unknowns": "不確実な要素"
   },
-  { "type": "contrarian", ... },
-  { "type": "minority", ..., "verification_status": "unverified" }
+  { "type": "contrarian", "..." : "同じ形式" },
+  { "type": "minority", "...", "verification_status": "unverified" }
 ]
 ```
 
@@ -120,7 +132,7 @@ echo "GROK_API_KEY=your-key-here" > .env
 node echo-breaker.js "検証したいクエリ"
 ```
 
-`.env.example` を参照してください。
+`--init` を使えば対話的に設定できます。`.env.example` も参照してください。
 
 ## 思考エンジンの優先順位
 
@@ -130,7 +142,13 @@ node echo-breaker.js "検証したいクエリ"
 | 2 | Grok API | `.env` に `GROK_API_KEY` が設定されている場合 | 70/100 |
 | 3 | フォールバック (v0.51) | 上記どちらもない場合（無料・常時動作） | 35/100 |
 
-分散スコアはエンジンの実態を反映。BYOAIが最も高い多様性を持ちます。
+`--compare` モードでは利用可能な全エンジンを同時実行し、エンジン間の意見の乖離から **真の分散スコア** を算出します。
+
+## Genesis
+
+- **Founder**: Hiro.T
+- **Wallet**: `rnioHtjC7xQVAkXpmDPtanq7qypPyN64ui`
+- **Genesis Tx**: `D84341CC154F2CFDA59F5791D93982F7FF7167B589F6FC95EBDD5FB35FBD4DBC`
 
 ## Records
 
@@ -138,18 +156,18 @@ node echo-breaker.js "検証したいクエリ"
 
 ## Philosophy
 
-- 証拠第一（結論を強制しない）
-- 多角的視点の保存（主流・逆張り・少数）
-- 権力バイアスの明示（who_benefits）
-- 不確実性の記録（unknowns）
-- 反証可能性の義務化（falsifiability）
-- 一切の金銭報酬なし
+1. **証拠第一** — 結論を強制しない
+2. **多角的視点** — 主流・逆張り・少数の3視点を必ず記録
+3. **権力バイアスの明示** — who_benefits を必ず記載
+4. **不確実性の記録** — unknowns を隠さない
+5. **反証可能性の義務化** — falsifiability で検証可能性を担保
+6. **報酬ゼロ** — 純粋利他的。一切の金銭報酬なし
 
 ## Project Structure
 
 ```
 xrpl-echo-breaker/
-├── echo-breaker.js        # メインスクリプト (v0.6)
+├── echo-breaker.js        # メインスクリプト (v1.0)
 ├── genesis.js             # Genesis刻印スクリプト
 ├── .env.example           # API設定テンプレート
 ├── package.json
@@ -157,8 +175,8 @@ xrpl-echo-breaker/
 │   └── sample-views.json  # BYOAIテンプレート
 ├── records/
 │   ├── index.md           # 全記録の一覧（自動生成）
-│   ├── record-NNN.json
-│   └── record-NNN.md
+│   ├── record-NNN.json    # 完全な記録データ
+│   └── record-NNN.md      # 人間が読めるMarkdown版
 └── archive/               # v0.2以前の旧ファイル
 ```
 
@@ -170,13 +188,13 @@ xrpl-echo-breaker/
 - [x] v0.4 — index.md自動生成、archive整理、Protocol Rules
 - [x] v0.5 — 視点生成の関数化（クエリ依存の動的分析）
 - [x] v0.6 — BYOAI対応 + Grok API接続 + フォールバック設計
-- [x] v0.7 — --reply-to / --note / 本物のスコア計算（エンジン依存の分散・視点依存の合意）
-- [x] v0.8 — --compare モード（全エンジン同時検証・エンジン間乖離から真の分散スコアを算出）
-- [x] v0.9 — 読む・検索するCLI（--list / --read NNN / --search "キーワード"）
-- [ ] v1.0 — npm publish + 他者が参加できる公開プロトコル
+- [x] v0.7 — --reply-to / --note / 本物のスコア計算
+- [x] v0.8 — --compare モード（全エンジン同時検証・真の分散スコア）
+- [x] v0.9 — 読む・検索するCLI（--list / --read / --search）
+- [x] v1.0 — --init / --verify / 他者が参加できる公開プロトコル
 
 ---
 
 Made with curiosity and persistence.
 
-このプロトコルはHiro.Tによって Genesis が刻まれ、思考のブロックチェーンとして成長していきます。
+このプロトコルは Hiro.T によって Genesis が刻まれ、思考のブロックチェーンとして成長していきます。

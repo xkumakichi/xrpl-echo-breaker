@@ -1,15 +1,35 @@
 {
   "name": "xrpl-echo-breaker",
-  "version": "0.1.0",
-  "description": "XRPL Echo Breaker - AI反響室を破るための多視点分析・記録ツール",
+  "version": "1.0.0",
+  "description": "Break echo chambers — record multi-perspective analysis immutably on the XRP Ledger",
   "main": "echo-breaker.js",
+  "bin": {
+    "echo-breaker": "echo-breaker.js"
+  },
   "scripts": {
     "start": "node echo-breaker.js",
-    "test": "node echo-breaker.js --dry-run"
+    "init": "node echo-breaker.js --init",
+    "verify": "node echo-breaker.js --verify",
+    "list": "node echo-breaker.js --list",
+    "test": "node echo-breaker.js --dry-run \"test query\""
   },
+  "keywords": [
+    "xrpl",
+    "echo-chamber",
+    "multi-perspective",
+    "fact-checking",
+    "decentralized",
+    "byoai",
+    "blockchain"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xkumakichi/xrpl-echo-breaker.git"
+  },
+  "author": "Hiro.T",
+  "license": "MIT",
   "dependencies": {
     "dotenv": "^17.4.0",
     "xrpl": "^4.2.0"
-  },
-  "license": "MIT"
+  }
 }
