@@ -1,0 +1,68 @@
+{
+  "type": "record",
+  "record_number": "006",
+  "query": "量子コンピュータはビットコインを破壊するか？",
+  "timestamp": "2026-04-03T14:41:01.398Z",
+  "views": [
+    {
+      "type": "mainstream",
+      "summary": "ハッシュレートの集中や機関投資家（ETF）の影響により、中央集権化リスクは中程度に存在すると評価される。",
+      "evidence": [
+        "https://btc.com/stats/pool",
+        "https://glassnode.com/"
+      ],
+      "probability": 63,
+      "who_benefits": "機関投資家・大手マイニング企業・中央集権的取引所",
+      "falsifiability": {
+        "level": "high",
+        "condition": "上位プールのシェアが70%超かつ51%攻撃が発生した場合に強化"
+      },
+      "unknowns": "分散型マイニング技術の将来普及度"
+    },
+    {
+      "type": "contrarian",
+      "summary": "プロトコル設計は本質的に非中央集権的。集中は市場の一時的現象であり、インセンティブで分散化が進む可能性が高い。",
+      "evidence": [
+        "https://bitcoin.org/bitcoin.pdf"
+      ],
+      "probability": 43,
+      "who_benefits": "分散志向の個人マイナー・開発者コミュニティ",
+      "falsifiability": {
+        "level": "medium",
+        "condition": "長期的な分散傾向が見られなかった場合に弱まる"
+      },
+      "unknowns": "51%攻撃の実現可能性と影響"
+    },
+    {
+      "type": "minority",
+      "summary": "すでに強い中央集権化が進んでおり、特定の勢力の隠れた影響が背景にある可能性が指摘されている。",
+      "evidence": [],
+      "probability": 27,
+      "who_benefits": "ビットコイン懐疑派・代替通貨推進勢力",
+      "falsifiability": {
+        "level": "low",
+        "condition": "具体的な証拠が公開された場合のみ判定可能"
+      },
+      "unknowns": "隠れた影響力ネットワークの実態",
+      "verification_status": "unverified"
+    }
+  ],
+  "consensus_score": 57,
+  "diversity_score": 35,
+  "generation": {
+    "engine": "fallback-v0.51",
+    "reply_to": "001",
+    "note": "量子問題は中央集権問題と根が同じかもしれない"
+  },
+  "origin": {
+    "protocol": "XRPL Echo Breaker",
+    "genesis_tx": "D84341CC154F2CFDA59F5791D93982F7FF7167B589F6FC95EBDD5FB35FBD4DBC",
+    "founder": "Hiro.T",
+    "founder_wallet": "rnioHtjC7xQVAkXpmDPtanq7qypPyN64ui"
+  },
+  "prev_hash": "b651c8752da23eaa42a3d091a970c6d10b0b3f8c3d8733921d3bf4b6c5c50b73",
+  "meta": {
+    "engine": "fallback-v0.51",
+    "version": "v0.7"
+  }
+}
