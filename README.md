@@ -15,6 +15,7 @@ AIと人間が協力して、偏った情報環境（エコーチェンバー）
 - 反証可能性の記録
 - XRPLによる改ざん耐性記録
 - ハッシュ連鎖による知識の継承
+- **BYOAI対応** — 自分のAIで生成した視点をそのまま記録可能
 - 報酬ゼロ・純粋貢献設計
 
 ## Genesis
@@ -30,9 +31,10 @@ AIと人間が協力して、偏った情報環境（エコーチェンバー）
 - **Contrarian (45%)**: プロトコル設計は非中央集権的。集中は一時的でインセンティブにより分散化する
 - **Minority (25%)**: 既にかなりの中央集権化が進行。特定勢力の隠れた影響の可能性
 
-### Record #002 — AIは人間の創造性を超える可能性があるか？
-- 同じクエリに対して3視点を生成し、XRPLに永久記録
-- 各視点に「誰が得するか」「反証条件」「不確実性」を明示
+### Record #005 — 量子コンピュータは暗号通貨を破壊するか？
+- **Mainstream (55%)**: 実用的な脅威は2030年代以降。現時点では低リスク
+- **Contrarian (40%)**: 暗号通貨コミュニティはポスト量子暗号への移行を既に進めている
+- **Minority (15%)**: 国家レベルで既に破られている可能性。公開情報は実態より遅れている
 
 ## Usage
 
@@ -41,12 +43,64 @@ git clone https://github.com/xkumakichi/xrpl-echo-breaker.git
 cd xrpl-echo-breaker
 npm install
 
-# 記録を作成（XRPLテストネットに書き込み）
+# 基本（フォールバック思考エンジンで記録）
 node echo-breaker.js "検証したいクエリ"
 
-# dry-runで確認のみ
+# dry-runで確認のみ（XRPLに書き込まない）
 node echo-breaker.js --dry-run "検証したいクエリ"
 ```
+
+## BYOAI（Bring Your Own AI）
+
+自分のAIで生成した視点をJSONで持ち込んで記録できます。
+コスト・AIの選択・視点の質は全てあなた自身が制御します。
+
+```bash
+# ChatGPT / Grok / Gemini など任意のAIで views.json を生成
+node echo-breaker.js --input views.json "検証したいクエリ"
+```
+
+**views.json の形式:**
+
+```json
+[
+  {
+    "type": "mainstream",
+    "summary": "主流の見解...",
+    "evidence": ["参照URL or 文献"],
+    "probability": 65,
+    "who_benefits": "得をする権力構造を具体的に",
+    "falsifiability": {
+      "level": "high",
+      "condition": "誤りとなる具体的条件"
+    },
+    "unknowns": "不確実な要素"
+  },
+  { "type": "contrarian", ... },
+  { "type": "minority", ..., "verification_status": "unverified" }
+]
+```
+
+サンプルは [`examples/sample-views.json`](./examples/sample-views.json) を参照。
+
+## AI API（オプション）
+
+Grok API キーを持っている場合、自動で本物の多角的視点を生成します。
+
+```bash
+echo "GROK_API_KEY=your-key-here" > .env
+node echo-breaker.js "検証したいクエリ"
+```
+
+`.env.example` を参照してください。
+
+## 思考エンジンの優先順位
+
+| 優先度 | 方式 | 条件 |
+|--------|------|------|
+| 1 | BYOAI (`--input`) | 外部JSONを指定した場合 |
+| 2 | Grok API | `.env` に `GROK_API_KEY` が設定されている場合 |
+| 3 | フォールバック (v0.51) | 上記どちらもない場合（無料・常時動作） |
 
 ## Records
 
@@ -65,14 +119,17 @@ node echo-breaker.js --dry-run "検証したいクエリ"
 
 ```
 xrpl-echo-breaker/
-├── echo-breaker.js    # メインスクリプト (v0.4)
-├── genesis.js         # Genesis刻印スクリプト
+├── echo-breaker.js        # メインスクリプト (v0.6)
+├── genesis.js             # Genesis刻印スクリプト
+├── .env.example           # API設定テンプレート
 ├── package.json
+├── examples/
+│   └── sample-views.json  # BYOAIテンプレート
 ├── records/
-│   ├── index.md       # 全記録の一覧（自動生成）
+│   ├── index.md           # 全記録の一覧（自動生成）
 │   ├── record-NNN.json
 │   └── record-NNN.md
-└── archive/           # v0.2以前の旧ファイル
+└── archive/               # v0.2以前の旧ファイル
 ```
 
 ## Roadmap
@@ -81,9 +138,9 @@ xrpl-echo-breaker/
 - [x] v0.2 — falsifiabilityオブジェクト化、分散スコア自動計算
 - [x] v0.31 — ハッシュ連鎖、Genesis接続、連番自動化
 - [x] v0.4 — index.md自動生成、archive整理、Protocol Rules
-- [ ] v0.5 — 視点生成の関数化（クエリ依存の動的分析）
-- [ ] v0.6 — AI API接続（半自動化）
-- [ ] v0.7 — 完全自動化
+- [x] v0.5 — 視点生成の関数化（クエリ依存の動的分析）
+- [x] v0.6 — BYOAI対応 + Grok API接続 + フォールバック設計
+- [ ] v0.7 — 複数AI比較記録（同一クエリを複数AIで検証）
 
 ---
 
