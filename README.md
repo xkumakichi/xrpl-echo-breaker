@@ -48,6 +48,15 @@ node echo-breaker.js "検証したいクエリ"
 
 # dry-runで確認のみ（XRPLに書き込まない）
 node echo-breaker.js --dry-run "検証したいクエリ"
+
+# 既存記録への応答として記録（知識の対話を作る）
+node echo-breaker.js --reply-to 001 "関連する新しいクエリ"
+
+# 思考プロセスをメモとして残す
+node echo-breaker.js --note "なぜこの視点に至ったか" "検証したいクエリ"
+
+# 組み合わせも可能
+node echo-breaker.js --reply-to 003 --note "前の記録を読んで疑問が生まれた" "新しいクエリ"
 ```
 
 ## BYOAI（Bring Your Own AI）
@@ -96,11 +105,13 @@ node echo-breaker.js "検証したいクエリ"
 
 ## 思考エンジンの優先順位
 
-| 優先度 | 方式 | 条件 |
-|--------|------|------|
-| 1 | BYOAI (`--input`) | 外部JSONを指定した場合 |
-| 2 | Grok API | `.env` に `GROK_API_KEY` が設定されている場合 |
-| 3 | フォールバック (v0.51) | 上記どちらもない場合（無料・常時動作） |
+| 優先度 | 方式 | 条件 | 分散スコア |
+|--------|------|------|-----------|
+| 1 | BYOAI (`--input`) | 外部JSONを指定した場合 | 90/100 |
+| 2 | Grok API | `.env` に `GROK_API_KEY` が設定されている場合 | 70/100 |
+| 3 | フォールバック (v0.51) | 上記どちらもない場合（無料・常時動作） | 35/100 |
+
+分散スコアはエンジンの実態を反映。BYOAIが最も高い多様性を持ちます。
 
 ## Records
 
@@ -140,7 +151,8 @@ xrpl-echo-breaker/
 - [x] v0.4 — index.md自動生成、archive整理、Protocol Rules
 - [x] v0.5 — 視点生成の関数化（クエリ依存の動的分析）
 - [x] v0.6 — BYOAI対応 + Grok API接続 + フォールバック設計
-- [ ] v0.7 — 複数AI比較記録（同一クエリを複数AIで検証）
+- [x] v0.7 — --reply-to / --note / 本物のスコア計算（エンジン依存の分散・視点依存の合意）
+- [ ] v0.8 — 複数AI比較記録（同一クエリを複数エンジンで同時検証）
 
 ---
 
