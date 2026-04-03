@@ -1,0 +1,64 @@
+{
+  "type": "record",
+  "record_number": "005",
+  "query": "量子コンピュータは暗号通貨を破壊するか？",
+  "timestamp": "2026-04-03T09:12:52.237Z",
+  "views": [
+    {
+      "type": "mainstream",
+      "summary": "量子コンピュータが現在の暗号技術を破る能力を持つには、数千〜数百万の論理量子ビットが必要であり、2030年代以降と見られている。短期的にはリスクは低い。",
+      "evidence": [
+        "NIST Post-Quantum Cryptography標準化",
+        "IBM量子ロードマップ"
+      ],
+      "probability": 55,
+      "who_benefits": "量子コンピュータ開発企業（IBM, Google）、ポスト量子暗号研究者、国家安全保障機関",
+      "falsifiability": {
+        "level": "high",
+        "condition": "2030年以前に大規模量子コンピュータがRSA-2048やECDSAを実時間で解読した場合に弱まる"
+      },
+      "unknowns": "量子エラー訂正の実用化スピード"
+    },
+    {
+      "type": "contrarian",
+      "summary": "暗号通貨コミュニティは既にポスト量子暗号への移行を進めており、量子脅威は過大評価されている。ビットコインのプロトコル更新で対応可能。",
+      "evidence": [
+        "Ethereum 2.0の量子耐性研究",
+        "NIST PQC標準の採用動向"
+      ],
+      "probability": 40,
+      "who_benefits": "暗号通貨推進者、ブロックチェーン開発者コミュニティ",
+      "falsifiability": {
+        "level": "medium",
+        "condition": "暗号通貨プロトコルの量子耐性アップグレードが技術的・政治的に失敗した場合に弱まる"
+      },
+      "unknowns": "大規模コンセンサスによるプロトコル変更の実現可能性"
+    },
+    {
+      "type": "minority",
+      "summary": "国家レベルの量子コンピュータが秘密裏に開発されており、既に一部の暗号は破られている可能性がある。公開情報は実態より数年遅れている。",
+      "evidence": [],
+      "probability": 15,
+      "who_benefits": "国家情報機関（NSA等）、量子軍拡競争に参加する国家",
+      "falsifiability": {
+        "level": "low",
+        "condition": "国家レベルの量子能力に関する内部告発やリークがあった場合のみ判定可能"
+      },
+      "unknowns": "国家の秘密量子プログラムの実態",
+      "verification_status": "unverified"
+    }
+  ],
+  "consensus_score": 55,
+  "diversity_score": 75,
+  "origin": {
+    "protocol": "XRPL Echo Breaker",
+    "genesis_tx": "D84341CC154F2CFDA59F5791D93982F7FF7167B589F6FC95EBDD5FB35FBD4DBC",
+    "founder": "Hiro.T",
+    "founder_wallet": "rnioHtjC7xQVAkXpmDPtanq7qypPyN64ui"
+  },
+  "prev_hash": "5692334c469a97c1de060776b47c0aff326f323e0824ed7f64962302163c2b51",
+  "meta": {
+    "engine": "byoai-external",
+    "version": "v0.6"
+  }
+}

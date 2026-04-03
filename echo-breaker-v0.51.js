@@ -1,4 +1,3 @@
-require('dotenv').config();
 const xrpl = require('xrpl');
 const fs = require('fs');
 const path = require('path');
@@ -6,7 +5,6 @@ const crypto = require('crypto');
 
 // ==================== 設定 ====================
 const TESTNET_URL = "wss://s.altnet.rippletest.net:51233";
-const GROK_API_KEY = process.env.GROK_API_KEY;
 
 const GENESIS = {
   txHash: "D84341CC154F2CFDA59F5791D93982F7FF7167B589F6FC95EBDD5FB35FBD4DBC",
@@ -15,170 +13,17 @@ const GENESIS = {
 };
 
 const DRY_RUN = process.argv.includes("--dry-run");
-
-// --input views.json の検出
-const inputIdx = process.argv.indexOf("--input");
-const INPUT_FILE = inputIdx !== -1 ? process.argv[inputIdx + 1] : null;
-
-// クエリ取得（--dry-run, --input, --inputの値を除外）
-const skipArgs = new Set(["--dry-run", "--input"]);
-if (INPUT_FILE) skipArgs.add(INPUT_FILE);
-const QUERY = process.argv.slice(2).filter(a => !skipArgs.has(a))[0];
-
-if (!QUERY) {
-  console.error(`使い方:
-  node echo-breaker.js "検証したいクエリ"
-  node echo-breaker.js --dry-run "検証したいクエリ"
-  node echo-breaker.js --input views.json "検証したいクエリ"  (BYOAI)`);
-  process.exit(1);
-}
+const QUERY = process.argv.filter(a => a !== "--dry-run").slice(2)[0]
+  || "ビットコインの中央集権化リスクは実際どの程度存在するのか？";
 
 const RECORDS_DIR = path.join(__dirname, 'records');
 const RECORD_PATTERN = /^record-\d{3}\.json$/;
 
-// ==================== BYOAI: 外部JSON読み込み ====================
-function loadExternalViews(filePath) {
-  try {
-    const raw = fs.readFileSync(filePath, 'utf8');
-    const views = JSON.parse(raw);
-
-    if (!Array.isArray(views) || views.length < 3) {
-      console.error("❌ --input JSON: 3つ以上の視点が必要です");
-      return null;
-    }
-
-    const required = ['type', 'summary', 'probability', 'who_benefits', 'falsifiability'];
-    for (const v of views) {
-      const missing = required.filter(f => v[f] === undefined);
-      if (missing.length > 0) {
-        console.error(`❌ --input JSON: "${v.type || '?'}" に必須フィールド不足: ${missing.join(', ')}`);
-        return null;
-      }
-    }
-
-    const types = views.map(v => v.type);
-    if (!types.includes('mainstream') || !types.includes('contrarian') || !types.includes('minority')) {
-      console.error("❌ --input JSON: mainstream, contrarian, minority の3タイプが必要です");
-      return null;
-    }
-
-    console.log(`✅ 外部JSON読み込み完了: ${filePath} (${views.length}視点)`);
-    return views;
-  } catch (err) {
-    console.error(`❌ --input JSON読み込みエラー: ${err.message}`);
-    return null;
-  }
-}
-
-// ==================== Grok APIで視点生成 ====================
-async function generateViewsWithGrok(query) {
-  if (!GROK_API_KEY) {
-    console.log("⚠️  GROK_API_KEY未設定 → フォールバック思考エンジンを使用");
-    return null;
-  }
-
-  const prompt = `あなたはXRPL Echo Breakerの思考エンジンです。
-以下のクエリに対し、厳密に3つの視点をJSON配列で出力してください。
-
-クエリ: "${query}"
-
-出力形式（この形式のJSON配列のみ出力、説明文は不要）:
-[
-  {
-    "type": "mainstream",
-    "summary": "主流の見解を具体的に（2-3文）",
-    "evidence": ["参照元URL or 文献名"],
-    "probability": 数値(0-100),
-    "who_benefits": "この見解が広まると得をする権力構造を具体的に",
-    "falsifiability": {"level": "high/medium/low", "condition": "この見解が誤りとなる具体的条件"},
-    "unknowns": "この見解で不確実な要素"
-  },
-  {
-    "type": "contrarian",
-    "summary": "逆張り・反証的な見解を具体的に",
-    "evidence": ["参照元"],
-    "probability": 数値(0-100),
-    "who_benefits": "権力構造",
-    "falsifiability": {"level": "...", "condition": "..."},
-    "unknowns": "不確実な要素"
-  },
-  {
-    "type": "minority",
-    "summary": "少数・極端な仮説を具体的に",
-    "evidence": [],
-    "probability": 数値(0-100),
-    "who_benefits": "権力構造",
-    "falsifiability": {"level": "low", "condition": "..."},
-    "unknowns": "不確実な要素",
-    "verification_status": "unverified"
-  }
-]
-
-ルール:
-- 結論を強要しない。多角的に提示する
-- 権力バイアス（who_benefits）を具体的な組織名・勢力名で明示する
-- 反証可能性は必ず具体的条件を書く
-- 日本語で自然に
-- JSON配列のみ出力（前後に説明文を付けない）`;
-
-  try {
-    console.log("🤖 Grok APIに問い合わせ中...");
-    const response = await fetch("https://api.x.ai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${GROK_API_KEY}`
-      },
-      body: JSON.stringify({
-        model: "grok-3",
-        messages: [{ role: "user", content: prompt }],
-        temperature: 0.7,
-        max_tokens: 1500
-      })
-    });
-
-    if (!response.ok) {
-      console.log(`⚠️  Grok API エラー (${response.status}) → フォールバック使用`);
-      return null;
-    }
-
-    const data = await response.json();
-    const text = data.choices[0].message.content;
-
-    // JSON配列を抽出
-    const jsonMatch = text.match(/\[[\s\S]*\]/);
-    if (!jsonMatch) {
-      console.log("⚠️  Grok応答からJSON抽出失敗 → フォールバック使用");
-      return null;
-    }
-
-    const views = JSON.parse(jsonMatch[0]);
-
-    // 基本検証: 3視点あるか、必須フィールドがあるか
-    if (!Array.isArray(views) || views.length < 3) {
-      console.log("⚠️  Grok応答の視点数が不足 → フォールバック使用");
-      return null;
-    }
-
-    for (const v of views) {
-      if (!v.type || !v.summary || v.probability === undefined || !v.who_benefits || !v.falsifiability) {
-        console.log("⚠️  Grok応答に必須フィールド不足 → フォールバック使用");
-        return null;
-      }
-    }
-
-    console.log("✅ Grok APIから視点を取得しました");
-    return views;
-  } catch (error) {
-    console.log(`⚠️  Grok API接続失敗: ${error.message} → フォールバック使用`);
-    return null;
-  }
-}
-
-// ==================== フォールバック: v0.51ルールベース思考エンジン ====================
-function generateViewsFallback(query) {
+// ==================== 視点生成（v0.5 新機能） ====================
+function generateViews(query) {
   const q = query.toLowerCase();
 
+  // ビットコイン / 中央集権 関連
   if (q.includes("ビットコイン") || q.includes("bitcoin") || q.includes("中央集権")) {
     return [
       {
@@ -186,16 +31,16 @@ function generateViewsFallback(query) {
         summary: "ハッシュレートの集中や機関投資家（ETF）の影響により、中央集権化リスクは中程度に存在すると評価される。",
         evidence: ["https://btc.com/stats/pool", "https://glassnode.com/"],
         probability: 65,
-        who_benefits: "機関投資家・大手マイニング企業・中央集権的取引所",
+        who_benefits: "大手マイニング企業、取引所、機関投資家",
         falsifiability: { level: "high", condition: "上位プールのシェアが70%超かつ51%攻撃が発生した場合に強化" },
         unknowns: "分散型マイニング技術の将来普及度"
       },
       {
         type: "contrarian",
         summary: "プロトコル設計は本質的に非中央集権的。集中は市場の一時的現象であり、インセンティブで分散化が進む可能性が高い。",
-        evidence: ["https://bitcoin.org/bitcoin.pdf"],
+        evidence: ["https://bitcoin.org/bitcoin.pdf", "https://github.com/bitcoin/bitcoin"],
         probability: 45,
-        who_benefits: "分散志向の個人マイナー・開発者コミュニティ",
+        who_benefits: "ビットコイン純粋主義者、分散型思想を重視する層",
         falsifiability: { level: "medium", condition: "長期的な分散傾向が見られなかった場合に弱まる" },
         unknowns: "51%攻撃の実現可能性と影響"
       },
@@ -204,7 +49,7 @@ function generateViewsFallback(query) {
         summary: "すでに強い中央集権化が進んでおり、特定の勢力の隠れた影響が背景にある可能性が指摘されている。",
         evidence: [],
         probability: 25,
-        who_benefits: "ビットコイン懐疑派・代替通貨推進勢力",
+        who_benefits: "ビットコイン懐疑派、代替通貨推進勢力",
         falsifiability: { level: "low", condition: "具体的な証拠が公開された場合のみ判定可能" },
         unknowns: "隠れた影響力ネットワークの実態",
         verification_status: "unverified"
@@ -212,32 +57,33 @@ function generateViewsFallback(query) {
     ];
   }
 
+  // AI / 創造性 / 意識 関連
   if (q.includes("ai") || q.includes("人工知能") || q.includes("創造性") || q.includes("意識")) {
     return [
       {
         type: "mainstream",
-        summary: "現在のAIは特定タスクで人間を上回るが、真の創造性や意識はまだ持っていないとされる。",
-        evidence: ["https://arxiv.org"],
+        summary: "現在のAIは特定タスクで人間を上回るが、真の創造性や意識はまだ持っていないとされる。汎用的創造性では議論が分かれる。",
+        evidence: ["https://arxiv.org", "OpenAI技術レポート"],
         probability: 70,
-        who_benefits: "大手テック企業（OpenAI, Google等）・資本投資家",
-        falsifiability: { level: "high", condition: "AIが自律的に新規の科学発見を生み出した場合に弱まる" },
+        who_benefits: "既存のAI企業、技術楽観主義者",
+        falsifiability: { level: "high", condition: "AIが完全に新規で価値ある芸術作品や科学発見を自律的に生み出した場合に弱まる" },
         unknowns: "AGIレベルの創造性が発現する時期"
       },
       {
         type: "contrarian",
-        summary: "AIはすでに人間の創造性を補完・拡張しており、近い将来に超える可能性が十分にある。",
-        evidence: ["AlphaFoldによるタンパク質構造予測"],
+        summary: "AIはすでに人間の創造性を補完・拡張しており、近い将来に超える可能性が十分にある。創造性の定義自体を再考すべき。",
+        evidence: ["AI生成芸術・論文事例", "AlphaFoldによるタンパク質構造予測"],
         probability: 50,
-        who_benefits: "オープンソースコミュニティ・独立研究者",
+        who_benefits: "AI開発者、技術進歩主義者",
         falsifiability: { level: "medium", condition: "AIが長期間創造的ブレイクスルーを起こせなかった場合に弱まる" },
         unknowns: "創造性の定義そのもの"
       },
       {
         type: "minority",
-        summary: "AIはすでに人間の創造性を超えており、我々が気づいていないだけで支配的な影響を及ぼし始めている。",
+        summary: "AIはすでに人間の創造性を超えており、我々が気づいていないだけで支配的な影響を及ぼし始めている可能性がある。",
         evidence: [],
         probability: 30,
-        who_benefits: "AIリスク警戒層・哲学者・倫理研究者",
+        who_benefits: "AI警戒派、AI規制推進者",
         falsifiability: { level: "low", condition: "AIの隠れた創造的影響が明確に証明された場合" },
         unknowns: "AIの潜在的な自己進化メカニズム",
         verification_status: "unverified"
@@ -245,32 +91,66 @@ function generateViewsFallback(query) {
     ];
   }
 
-  // 汎用フォールバック
+  // 気候変動 関連
+  if (q.includes("気候") || q.includes("climate") || q.includes("温暖化") || q.includes("環境")) {
+    return [
+      {
+        type: "mainstream",
+        summary: "人為的なCO2排出が気候変動の主因であるという科学的コンセンサスは97%以上。IPCCの報告が根拠。",
+        evidence: ["IPCC第6次評価報告書", "NASA Climate Change"],
+        probability: 90,
+        who_benefits: "再生可能エネルギー産業、環境政策推進者",
+        falsifiability: { level: "high", condition: "CO2濃度が上昇し続けても気温が安定した場合に弱まる" },
+        unknowns: "気候感度の正確な値、フィードバックループの強度"
+      },
+      {
+        type: "contrarian",
+        summary: "気候変動は自然サイクルの一部であり、人為的影響は過大評価されている。太陽活動や海洋循環の影響が過小評価されている。",
+        evidence: ["太陽活動周期データ", "古気候学データ"],
+        probability: 15,
+        who_benefits: "化石燃料産業、規制反対派",
+        falsifiability: { level: "medium", condition: "太陽活動低下期にも気温上昇が続いた場合に弱まる" },
+        unknowns: "太陽活動と気候の長期相関の全容"
+      },
+      {
+        type: "minority",
+        summary: "気候変動データ自体が政治的に操作されている可能性がある。科学的合意は資金と政治圧力で形成されているとする見方。",
+        evidence: [],
+        probability: 5,
+        who_benefits: "陰謀論支持者、一部の政治勢力",
+        falsifiability: { level: "low", condition: "独立した大規模データ監査が実施された場合のみ判定可能" },
+        unknowns: "科学コミュニティ内部の政治力学",
+        verification_status: "unverified"
+      }
+    ];
+  }
+
+  // 汎用クエリ（デフォルト）
   return [
     {
       type: "mainstream",
       summary: `「${query}」について、一般的な見解では中立〜肯定的な評価が主流。既存の研究やデータに基づく合意が形成されている。`,
       evidence: ["一般的な学術論文・専門家意見"],
       probability: 60,
-      who_benefits: "主流メディア・既存権力構造",
+      who_benefits: "主流意見の支持者、既存制度の維持者",
       falsifiability: { level: "medium", condition: "明確な反証データが大量に現れた場合" },
       unknowns: "長期的な影響と未知の変数"
     },
     {
       type: "contrarian",
-      summary: `「${query}」に対する主流の見解には重大な見落としや過小評価がある可能性が高い。`,
+      summary: `「${query}」に対する主流の見解には重大な見落としや過小評価がある可能性が高い。前提を疑う必要がある。`,
       evidence: ["批判的論文・少数意見"],
       probability: 40,
-      who_benefits: "批判的知識人・独立系分析者",
+      who_benefits: "異論を唱える研究者・実践者",
       falsifiability: { level: "medium", condition: "主流意見が長期的に正しかったと証明された場合に弱まる" },
       unknowns: "隠された前提条件と見落とされた変数"
     },
     {
       type: "minority",
-      summary: `「${query}」の背後には現在認識されていない大きな力学が働いている可能性がある。`,
+      summary: `「${query}」の背後には現在認識されていない大きな力学が働いている可能性がある。表面的な議論では捉えきれない構造的要因。`,
       evidence: [],
       probability: 20,
-      who_benefits: "周縁的思想グループ",
+      who_benefits: "極端仮説の支持者",
       falsifiability: { level: "low", condition: "決定的な証拠が現れた場合のみ判定可能" },
       unknowns: "未知の構造的要因",
       verification_status: "unverified"
@@ -313,8 +193,7 @@ function generateIndex() {
     content += `- **日時**: ${data.timestamp}\n`;
     content += `- **Mainstream要約**: ${short}\n`;
     content += `- **分散スコア**: ${data.diversity_score}/100\n`;
-    content += `- **Hash**: \`${hash.slice(0, 16)}...\`\n`;
-    content += `- **Engine**: ${data.meta?.version || "unknown"}\n\n`;
+    content += `- **Hash**: \`${hash.slice(0, 16)}...\`\n\n`;
   });
 
   content += `---\n\n`;
@@ -326,7 +205,7 @@ function generateIndex() {
 
 // ==================== メイン ====================
 async function main() {
-  console.log("🚀 XRPL Echo Breaker v0.6 起動...\n");
+  console.log("🚀 XRPL Echo Breaker v0.5 起動...\n");
   console.log(`クエリ: ${QUERY}`);
   console.log(`モード: ${DRY_RUN ? "DRY RUN" : "LIVE"}\n`);
 
@@ -353,32 +232,12 @@ async function main() {
   const { wallet } = await client.fundWallet();
   console.log(`📍 アドレス: ${wallet.address}\n`);
 
-  // 視点生成: --input (BYOAI) → Grok API → フォールバック
+  // 視点生成（v0.5: クエリ依存）
   console.log("🔍 多角的検証を開始...\n");
-  let views = null;
-  let engine = "unknown";
-
-  // 優先順位1: BYOAI（外部JSON）
-  if (INPUT_FILE) {
-    views = loadExternalViews(INPUT_FILE);
-    engine = "byoai-external";
-  }
-
-  // 優先順位2: Grok API
-  if (!views) {
-    views = await generateViewsWithGrok(QUERY);
-    if (views) engine = "grok-api";
-  }
-
-  // 優先順位3: v0.51フォールバック
-  if (!views) {
-    console.log("🔄 フォールバック思考エンジン (v0.51) を使用\n");
-    views = generateViewsFallback(QUERY);
-    engine = "fallback-v0.51";
-  }
+  const views = generateViews(QUERY);
 
   views.forEach(v => {
-    console.log(`   [${v.type}] ${v.probability}% — ${v.summary.slice(0, 70)}...`);
+    console.log(`   [${v.type}] ${v.probability}% — ${v.summary.slice(0, 60)}...`);
   });
   console.log();
 
@@ -390,7 +249,7 @@ async function main() {
     record_number: nextNumber,
     query: QUERY,
     timestamp: new Date().toISOString(),
-    views,
+    views: views,
     consensus_score,
     diversity_score,
     origin: {
@@ -401,8 +260,8 @@ async function main() {
     },
     prev_hash: prevHash,
     meta: {
-      engine: engine,
-      version: "v0.6"
+      ai_agents: ["grok-mainstream", "grok-contrarian", "grok-minority"],
+      version: "v0.5"
     }
   };
 
@@ -417,12 +276,10 @@ async function main() {
     ds: diversity_score,
     cs: consensus_score,
     f: GENESIS.founder,
-    e: engine,
     h: contentHash
   };
 
   console.log(`📝 Record #${nextNumber}`);
-  console.log(`   Engine: ${engine}`);
   console.log(`   Prev Hash: ${prevHash.slice(0, 16)}...`);
   console.log(`   Content Hash: ${contentHash.slice(0, 16)}...`);
 
@@ -457,7 +314,6 @@ async function main() {
   md += `**クエリ**: ${QUERY}\n`;
   md += `**記録日時**: ${fullRecord.timestamp}\n`;
   md += `**Tx Hash**: ${txHash}\n`;
-  md += `**Engine**: ${engine}\n`;
   md += `**Founder**: ${GENESIS.founder} (\`${GENESIS.wallet}\`)\n`;
   md += `**Prev Hash**: \`${prevHash}\`\n`;
   md += `**Content Hash**: \`${contentHash}\`\n\n`;
@@ -467,13 +323,8 @@ async function main() {
     md += `### ${view.type.charAt(0).toUpperCase() + view.type.slice(1)} (${view.probability}%)\n`;
     md += `${view.summary}\n\n`;
     md += `- 誰が得する？ ${view.who_benefits}\n`;
-    if (view.falsifiability) {
-      md += `- 反証可能性: ${view.falsifiability.level} (${view.falsifiability.condition})\n`;
-    }
+    md += `- 反証可能性: ${view.falsifiability.level} (${view.falsifiability.condition})\n`;
     md += `- 不確実性: ${view.unknowns}\n`;
-    if (view.evidence && view.evidence.length > 0) {
-      md += `- 参照: ${view.evidence.join(", ")}\n`;
-    }
     if (view.verification_status) md += `- 検証ステータス: ${view.verification_status}\n`;
     md += `\n`;
   });
@@ -489,7 +340,7 @@ async function main() {
   console.log(`📋 index.md 更新完了`);
 
   await client.disconnect();
-  console.log("\n🎉 v0.6 完了！");
+  console.log("\n🎉 v0.5 完了！ 視点がクエリ依存になりました。");
 }
 
 main().catch(console.error);

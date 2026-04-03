@@ -8,6 +8,7 @@
     "test": "node echo-breaker.js --dry-run"
   },
   "dependencies": {
+    "dotenv": "^17.4.0",
     "xrpl": "^4.2.0"
   },
   "license": "MIT"
