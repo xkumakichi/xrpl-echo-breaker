@@ -1,0 +1,14 @@
+{
+  "name": "xrpl-echo-breaker",
+  "version": "0.1.0",
+  "description": "XRPL Echo Breaker - AI反響室を破るための多視点分析・記録ツール",
+  "main": "echo-breaker.js",
+  "scripts": {
+    "start": "node echo-breaker.js",
+    "test": "node echo-breaker.js --dry-run"
+  },
+  "dependencies": {
+    "xrpl": "^4.2.0"
+  },
+  "license": "MIT"
+}

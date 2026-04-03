@@ -1,0 +1,68 @@
+{
+  "type": "record",
+  "record_number": "001",
+  "query": "ビットコインの中央集権化リスクは実際どの程度存在するのか？",
+  "timestamp": "2026-04-03T07:51:28.393Z",
+  "views": [
+    {
+      "type": "mainstream",
+      "summary": "ハッシュレート上位プールや機関投資家（ETF経由）の影響で、中央集権化リスクは中程度に存在するとされる。",
+      "evidence": [
+        "https://btc.com/stats/pool",
+        "https://glassnode.com/"
+      ],
+      "probability": 65,
+      "who_benefits": "大手マイニング企業、取引所、機関投資家",
+      "falsifiability": {
+        "level": "high",
+        "condition": "マイニングプール上位3社のシェアが70%を超え、51%攻撃が実行された場合に強化される"
+      },
+      "unknowns": "分散型マイニング技術（Stratum V2など）の普及速度"
+    },
+    {
+      "type": "contrarian",
+      "summary": "ビットコインのプロトコル設計自体は非中央集権的。集中は市場の一時的な現象で、インセンティブにより長期的に分散化する可能性が高い。",
+      "evidence": [
+        "https://bitcoin.org/bitcoin.pdf",
+        "https://github.com/bitcoin/bitcoin"
+      ],
+      "probability": 45,
+      "who_benefits": "ビットコイン純粋主義者、分散型思想を重視する層",
+      "falsifiability": {
+        "level": "medium",
+        "condition": "長期的にハッシュレートの分散傾向が見られず、特定のエンティティによる支配が固定化された場合に弱まる"
+      },
+      "unknowns": "51%攻撃の実現可能性とその経済的影響"
+    },
+    {
+      "type": "minority",
+      "summary": "すでにかなりの中央集権化が進んでおり、特定の勢力や隠れたネットワークの影響が背景にある可能性が指摘される。",
+      "evidence": [],
+      "probability": 25,
+      "who_benefits": "ビットコイン懐疑派、代替通貨推進勢力",
+      "falsifiability": {
+        "level": "low",
+        "condition": "具体的な影響力ネットワークの証拠が公開・検証された場合にのみ判定可能"
+      },
+      "unknowns": "隠れた影響力の詳細とその実態",
+      "verification_status": "unverified"
+    }
+  ],
+  "consensus_score": 55,
+  "diversity_score": 75,
+  "origin": {
+    "protocol": "XRPL Echo Breaker",
+    "genesis_tx": "D84341CC154F2CFDA59F5791D93982F7FF7167B589F6FC95EBDD5FB35FBD4DBC",
+    "founder": "Hiro.T",
+    "founder_wallet": "rnioHtjC7xQVAkXpmDPtanq7qypPyN64ui"
+  },
+  "prev_hash": "D84341CC154F2CFDA59F5791D93982F7FF7167B589F6FC95EBDD5FB35FBD4DBC",
+  "meta": {
+    "ai_agents": [
+      "grok-mainstream",
+      "grok-contrarian",
+      "grok-minority"
+    ],
+    "version": "v0.31"
+  }
+}
