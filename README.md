@@ -57,6 +57,12 @@ node echo-breaker.js --note "なぜこの視点に至ったか" "検証したい
 
 # 組み合わせも可能
 node echo-breaker.js --reply-to 003 --note "前の記録を読んで疑問が生まれた" "新しいクエリ"
+
+# 全エンジンで同時検証（真の分散スコアを計算）
+node echo-breaker.js --compare "検証したいクエリ"
+
+# BYOAI込みで全エンジン比較
+node echo-breaker.js --compare --input views.json "検証したいクエリ"
 ```
 
 ## BYOAI（Bring Your Own AI）
@@ -152,7 +158,9 @@ xrpl-echo-breaker/
 - [x] v0.5 — 視点生成の関数化（クエリ依存の動的分析）
 - [x] v0.6 — BYOAI対応 + Grok API接続 + フォールバック設計
 - [x] v0.7 — --reply-to / --note / 本物のスコア計算（エンジン依存の分散・視点依存の合意）
-- [ ] v0.8 — 複数AI比較記録（同一クエリを複数エンジンで同時検証）
+- [x] v0.8 — --compare モード（全エンジン同時検証・エンジン間乖離から真の分散スコアを算出）
+- [ ] v0.9 — 記録の検索・閲覧CLI（--read / --search）
+- [ ] v1.0 — npm publish + 他者が参加できる公開プロトコル
 
 ---
 
