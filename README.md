@@ -65,6 +65,19 @@ node echo-breaker.js --compare "検証したいクエリ"
 node echo-breaker.js --compare --input views.json "検証したいクエリ"
 ```
 
+## 読む・検索する
+
+```bash
+# 全記録を一覧表示
+node echo-breaker.js --list
+
+# 特定の記録を詳細表示
+node echo-breaker.js --read 003
+
+# キーワードで検索
+node echo-breaker.js --search "量子"
+```
+
 ## BYOAI（Bring Your Own AI）
 
 自分のAIで生成した視点をJSONで持ち込んで記録できます。
@@ -159,7 +172,7 @@ xrpl-echo-breaker/
 - [x] v0.6 — BYOAI対応 + Grok API接続 + フォールバック設計
 - [x] v0.7 — --reply-to / --note / 本物のスコア計算（エンジン依存の分散・視点依存の合意）
 - [x] v0.8 — --compare モード（全エンジン同時検証・エンジン間乖離から真の分散スコアを算出）
-- [ ] v0.9 — 記録の検索・閲覧CLI（--read / --search）
+- [x] v0.9 — 読む・検索するCLI（--list / --read NNN / --search "キーワード"）
 - [ ] v1.0 — npm publish + 他者が参加できる公開プロトコル
 
 ---
