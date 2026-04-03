@@ -1,0 +1,68 @@
+{
+  "type": "record",
+  "record_number": "004",
+  "query": "気候変動の主な原因は何か？",
+  "timestamp": "2026-04-03T08:30:50.430Z",
+  "views": [
+    {
+      "type": "mainstream",
+      "summary": "人為的なCO2排出が気候変動の主因であるという科学的コンセンサスは97%以上。IPCCの報告が根拠。",
+      "evidence": [
+        "IPCC第6次評価報告書",
+        "NASA Climate Change"
+      ],
+      "probability": 90,
+      "who_benefits": "再生可能エネルギー産業、環境政策推進者",
+      "falsifiability": {
+        "level": "high",
+        "condition": "CO2濃度が上昇し続けても気温が安定した場合に弱まる"
+      },
+      "unknowns": "気候感度の正確な値、フィードバックループの強度"
+    },
+    {
+      "type": "contrarian",
+      "summary": "気候変動は自然サイクルの一部であり、人為的影響は過大評価されている。太陽活動や海洋循環の影響が過小評価されている。",
+      "evidence": [
+        "太陽活動周期データ",
+        "古気候学データ"
+      ],
+      "probability": 15,
+      "who_benefits": "化石燃料産業、規制反対派",
+      "falsifiability": {
+        "level": "medium",
+        "condition": "太陽活動低下期にも気温上昇が続いた場合に弱まる"
+      },
+      "unknowns": "太陽活動と気候の長期相関の全容"
+    },
+    {
+      "type": "minority",
+      "summary": "気候変動データ自体が政治的に操作されている可能性がある。科学的合意は資金と政治圧力で形成されているとする見方。",
+      "evidence": [],
+      "probability": 5,
+      "who_benefits": "陰謀論支持者、一部の政治勢力",
+      "falsifiability": {
+        "level": "low",
+        "condition": "独立した大規模データ監査が実施された場合のみ判定可能"
+      },
+      "unknowns": "科学コミュニティ内部の政治力学",
+      "verification_status": "unverified"
+    }
+  ],
+  "consensus_score": 55,
+  "diversity_score": 75,
+  "origin": {
+    "protocol": "XRPL Echo Breaker",
+    "genesis_tx": "D84341CC154F2CFDA59F5791D93982F7FF7167B589F6FC95EBDD5FB35FBD4DBC",
+    "founder": "Hiro.T",
+    "founder_wallet": "rnioHtjC7xQVAkXpmDPtanq7qypPyN64ui"
+  },
+  "prev_hash": "d18924af001a291589e86cfbd17723ca68cedaef527f9909548f17f00adbb7a9",
+  "meta": {
+    "ai_agents": [
+      "grok-mainstream",
+      "grok-contrarian",
+      "grok-minority"
+    ],
+    "version": "v0.5"
+  }
+}
